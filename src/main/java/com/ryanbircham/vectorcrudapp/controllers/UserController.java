@@ -3,6 +3,7 @@ package com.ryanbircham.vectorcrudapp.controllers;
 import com.ryanbircham.vectorcrudapp.dto.User;
 import com.ryanbircham.vectorcrudapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,5 +35,26 @@ public class UserController {
         } else {
             return new ResponseEntity("Could not find a user with that email address.", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping
+    public ResponseEntity<Object> createUser(@RequestBody User newUser) {
+        try{
+            if (newUser.isValidUserData()) {
+                userRepository.save(newUser);
+                Optional<User> savedUser = userRepository.findUserByEmailAddress(newUser.getEmailAddress());
+                if(savedUser.isPresent()){
+                    return new ResponseEntity("User added", HttpStatus.OK);
+                }else{
+                    return new ResponseEntity("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            } else {
+                return new ResponseEntity("One or more fields are blank", HttpStatus.BAD_REQUEST);
+            }
+
+        } catch(DataIntegrityViolationException e) {
+            return new ResponseEntity("User with that email already exists", HttpStatus.CONFLICT);
+        }
+
     }
 }
