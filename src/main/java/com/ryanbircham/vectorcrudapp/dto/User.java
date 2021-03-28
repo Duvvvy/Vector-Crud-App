@@ -1,4 +1,4 @@
-package com.ryanbircham.vectortest.dto;
+package com.ryanbircham.vectorcrudapp.dto;
 
 import javax.persistence.*;
 
