@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/vector
+    username: ryan
+    password: CheekyGarlicNaan
+  jpa:
+    hibernate.ddl-auto: update
+    generate-ddl: true
+    show-sql: true
