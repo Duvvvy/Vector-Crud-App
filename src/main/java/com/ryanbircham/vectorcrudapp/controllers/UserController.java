@@ -5,10 +5,7 @@ import com.ryanbircham.vectorcrudapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -23,6 +20,17 @@ public class UserController {
         Optional<User> userInDB = userRepository.findUserByEmailAddress(email_address);
         if(userInDB.isPresent()){
             return new ResponseEntity<Object>(userInDB.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity("Could not find a user with that email address.", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping(value = "{email_address}")
+    public ResponseEntity<Object> deleteUser(@PathVariable String email_address){
+        Optional<User> outgoingUser = userRepository.findUserByEmailAddress(email_address);
+        if(outgoingUser.isPresent()){
+            userRepository.delete(outgoingUser.get());
+            return new ResponseEntity("User Deleted", HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity("Could not find a user with that email address.", HttpStatus.NOT_FOUND);
         }
