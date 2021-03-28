@@ -59,4 +59,22 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    public Boolean isValidUserData() {
+        if(getFirstName().isBlank()){
+            return false;
+        }
+        if(getEmailAddress().isBlank()){
+            return false;
+        }
+        if(getPassword().isBlank()){
+            return false;
+        }
+        if(getLastName().isBlank()){
+            return false;
+        }
+        return true;
+    }
+
 }
+
