@@ -57,4 +57,24 @@ public class UserController {
         }
 
     }
+
+    @PutMapping(value = "{email_address}")
+    public ResponseEntity<Object> updateUser(@PathVariable String email_address, @RequestBody User update){
+        Optional<User> savedUser = userRepository.findUserByEmailAddress(email_address);
+        if(savedUser.isPresent()){
+            User userInDB = savedUser.get();
+            //We set all fields, except ID, as when you save with a non-unique primary key, it will update.
+            userInDB.setEmailAddress(update.getEmailAddress());
+            userInDB.setPassword(update.getPassword());
+            userInDB.setFirstName(update.getFirstName());
+            userInDB.setLastName(update.getLastName());
+
+            userRepository.save(userInDB);
+            return new ResponseEntity("User updated", HttpStatus.OK);
+
+        }else{
+            return new ResponseEntity("Error", HttpStatus.CONFLICT);
+
+        }
+    }
 }
