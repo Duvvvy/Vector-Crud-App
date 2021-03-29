@@ -8,3 +8,9 @@ spring:
     hibernate.ddl-auto: update
     generate-ddl: true
     show-sql: true
+  server:
+    error:
+      include-message: always
+      include-binding-errors: never
+      include-stacktrace: never
+      include-exception: false

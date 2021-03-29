@@ -1,10 +1,12 @@
 package com.ryanbircham.vectorcrudapp.controllers;
 
 import com.ryanbircham.vectorcrudapp.dto.User;
+import com.ryanbircham.vectorcrudapp.handler.JsonResponseEntity;
 import com.ryanbircham.vectorcrudapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +21,13 @@ public class UserController {
     @GetMapping(value = "{email_address}")
     public ResponseEntity<Object> getUser(@PathVariable String email_address){
         Optional<User> userInDB = userRepository.findUserByEmailAddress(email_address);
-        if(userInDB.isPresent()){
-            return new ResponseEntity<Object>(userInDB.get(), HttpStatus.OK);
+        if(userInDB.isPresent()){//This one should be a response entity as it passes back its own User Object.
+            return new ResponseEntity<>(userInDB.get(), HttpStatus.OK);
         } else {
-            return new ResponseEntity("Could not find a user with that email address.", HttpStatus.NOT_FOUND);
+            return new JsonResponseEntity(
+                    "Could not find a user with that email address.",
+                    HttpStatus.NOT_FOUND
+            ).getResponse();
         }
     }
 
@@ -31,29 +36,45 @@ public class UserController {
         Optional<User> outgoingUser = userRepository.findUserByEmailAddress(email_address);
         if(outgoingUser.isPresent()){
             userRepository.delete(outgoingUser.get());
-            return new ResponseEntity("User Deleted", HttpStatus.NOT_FOUND);
+            return new JsonResponseEntity("User Deleted", HttpStatus.OK).getResponse();
         } else {
-            return new ResponseEntity("Could not find a user with that email address.", HttpStatus.NOT_FOUND);
+            return new JsonResponseEntity(
+                    "Could not find a user with that email address.",
+                    HttpStatus.NOT_FOUND
+            ).getResponse();
         }
     }
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> createUser(@RequestBody User newUser) {
         try{
             if (newUser.isValidUserData()) {
                 userRepository.save(newUser);
                 Optional<User> savedUser = userRepository.findUserByEmailAddress(newUser.getEmailAddress());
                 if(savedUser.isPresent()){
-                    return new ResponseEntity("User added", HttpStatus.OK);
+                    return new JsonResponseEntity(
+                            "The user was created successfully.",
+                            HttpStatus.CREATED
+                    ).getResponse();
+
                 }else{
-                    return new ResponseEntity("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new JsonResponseEntity(
+                            "Unexpected error",
+                            HttpStatus.INTERNAL_SERVER_ERROR
+                    ).getResponse();
                 }
             } else {
-                return new ResponseEntity("One or more fields are blank", HttpStatus.BAD_REQUEST);
+                return new JsonResponseEntity(
+                        "One or more fields are blank",
+                        HttpStatus.BAD_REQUEST
+                ).getResponse();
             }
 
         } catch(DataIntegrityViolationException e) {
-            return new ResponseEntity("User with that email already exists", HttpStatus.CONFLICT);
+            return new JsonResponseEntity(
+                    "User with that email already exists",
+                    HttpStatus.CONFLICT
+            ).getResponse();
         }
 
     }
@@ -70,10 +91,10 @@ public class UserController {
             userInDB.setLastName(update.getLastName());
 
             userRepository.save(userInDB);
-            return new ResponseEntity("User updated", HttpStatus.OK);
+            return new JsonResponseEntity("User updated", HttpStatus.OK).getResponse();
 
         }else{
-            return new ResponseEntity("Error", HttpStatus.CONFLICT);
+            return new JsonResponseEntity("Error", HttpStatus.CONFLICT).getResponse();
 
         }
     }
